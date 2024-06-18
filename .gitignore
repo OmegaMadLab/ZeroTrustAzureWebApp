@@ -1,0 +1,17 @@
+Intermediate.crt
+intermediate.csr
+SelfSignedRootCA.crt
+SelfSignedRootCA.csr
+SelfSignedRootCA.srl
+zerotrust-intermediate.key
+zerotrust.key
+zerotrust_omegamadlab_it.pfx
+interCA.cer
+interCA.crt
+interCA.csr
+interCA.key
+interCA.pfx
+rootCA.cer
+rootCA.crt
+rootCA.key
+rootCA.srl
