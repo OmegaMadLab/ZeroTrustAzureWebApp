@@ -5,6 +5,7 @@ SelfSignedRootCA.csr
 SelfSignedRootCA.srl
 zerotrust-intermediate.key
 zerotrust.key
+zerotrust.pfx
 zerotrust_omegamadlab_it.pfx
 interCA.cer
 interCA.crt

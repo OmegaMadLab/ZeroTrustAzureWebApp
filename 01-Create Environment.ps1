@@ -1,9 +1,8 @@
-$envPrefix = "AzureDay2024"
+$envPrefix = "AzureDay-2024"
 $location = "italynorth"
 $rgName = "$envPrefix-RG"
 $dnsDomainName = "omegamadlab.it"
 $dnsDomainARecordName = "zerotrust"
-$dnsDomainARecordValue = "192.168.10.100"
 
 $rg = Get-AzResourceGroup -Name $rgName -ErrorAction SilentlyContinue
 if(-not $rg) {
@@ -14,5 +13,4 @@ New-AzResourceGroupDeployment -ResourceGroupName $rgName `
     -TemplateFile .\main.bicep `
     -envPrefix $envPrefix `
     -dnsDomainName $dnsDomainName `
-    -dnsDomainARecordName $dnsDomainARecordName `
-    -dnsDomainARecordValue $dnsDomainARecordValue
+    -dnsDomainARecordName $dnsDomainARecordName

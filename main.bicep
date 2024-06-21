@@ -1,26 +1,20 @@
 param location string = resourceGroup().location
 param envPrefix string
-param adminUsername string = 'adminUser'
-@secure()
-param adminPassword string = newGuid()
 param dnsDomainName string
 param dnsDomainARecordName string
-param dnsDomainARecordValue string
 
 var spokeSubnetList = [
   {
     name: 'wafSubnet'
-    subnetPrefix: '192.168.0.0/24'
+    subnetPrefix: '192.168.1.0/24'
   }
   {
     name: 'appSubnet'
-    subnetPrefix: '192.168.10.0/24'
-  }
-  {
-    name: 'clientSubnet'
-    subnetPrefix: '192.168.20.0/24'
+    subnetPrefix: '192.168.0.0/24'
   }
 ]
+
+var appPrivateEndpointIp = '192.168.0.10'
 
 var rtList = [
   {
@@ -139,7 +133,7 @@ resource spokeVnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {
   properties: {
     addressSpace: {
       addressPrefixes: [
-        '192.168.0.0/19'
+        '192.168.0.0/23'
       ]
     }
   }
@@ -171,7 +165,6 @@ resource peeringH2S 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@20
   dependsOn: [
     spokeSubnet[0]
     spokeSubnet[1]
-    spokeSubnet[2]
   ]
 }
 
@@ -229,13 +222,23 @@ resource webApp 'Microsoft.Web/sites@2020-12-01' = {
   }
 }
 
-resource privateEndpoint 'Microsoft.Network/privateEndpoints@2021-02-01' = {
+resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-11-01' = {
   name: 'WEBAPP-PE'
   location: location
   properties: {
     subnet: {
       id: spokeSubnet[1].id
     }
+    ipConfigurations: [
+      {
+        name: 'WEBAPP-PE-IPConfig'
+        properties: {
+          privateIPAddress: appPrivateEndpointIp
+          groupId: 'sites'
+          memberName: 'sites'
+        }
+      }
+    ]
     privateLinkServiceConnections: [
       {
         name: 'WEBAPP-ServiceConnection'
@@ -311,64 +314,6 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-02-01' = {
   }
 }
 
-resource networkInterface 'Microsoft.Network/networkInterfaces@2023-11-01' = {
-  name: 'CLIENT-VM-NIC'
-  location: location
-  properties: {
-    ipConfigurations: [
-      {
-        name: 'ipConfig'
-        properties: {
-          privateIPAllocationMethod: 'Dynamic'
-          subnet: {
-            id: spokeSubnet[2].id
-          }
-        }
-      }
-    ]
-  }
-}
-
-resource windowsVM 'Microsoft.Compute/virtualMachines@2024-03-01' = {
-  name: 'CLIENT-VM'
-  location: location
-  properties: {
-    hardwareProfile: {
-      vmSize: 'Standard_D2s_v3'
-    }
-    osProfile: {
-      computerName: 'CLIENT-VM'
-      adminUsername: adminUsername
-      adminPassword: adminPassword
-    }
-    storageProfile: {
-      imageReference: {
-        publisher: 'MicrosoftWindowsServer'
-        offer: 'WindowsServer'
-        sku: '2022-datacenter-azure-edition'
-        version: 'latest'
-      }
-      osDisk: {
-        name: 'name'
-        caching: 'ReadWrite'
-        createOption: 'FromImage'
-      }
-    }
-    networkProfile: {
-      networkInterfaces: [
-        {
-          id: networkInterface.id
-        }
-      ]
-    }
-    diagnosticsProfile: {
-      bootDiagnostics: {
-        enabled: true    
-      }
-    }
-  }
-}
-
 resource splitDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
   name: dnsDomainName
   location: 'global'
@@ -386,15 +331,27 @@ resource splitDnsZoneSpokeLink 'Microsoft.Network/privateDnsZones/virtualNetwork
   }
 }
 
+resource splitDnsZoneHubLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+  parent: splitDnsZone
+  name: 'split-hub-link'
+  location: 'global'
+  properties: {
+    registrationEnabled: false
+    virtualNetwork: {
+      id: hubVnet.id
+    }
+  }
+}
+
 resource dnsRecord 'Microsoft.Network/privateDnsZones/A@2020-06-01' = {
   parent: splitDnsZone
   name: dnsDomainARecordName
   properties: {
-    ttl: 3600
     aRecords: [
-      {
-        ipv4Address: dnsDomainARecordValue
-      }
+        {
+          ipv4Address: appPrivateEndpointIp
+        }
     ]
+    ttl: 300
   }
 }
