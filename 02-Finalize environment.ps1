@@ -64,6 +64,7 @@ $ipConfig = New-AzApplicationGatewayIPConfiguration -Name "appGwIpConfig" -Subne
 $frontendPort = New-AzApplicationGatewayFrontendPort -Name "appGwFrontendPort" -Port 443
 $frontendPublicIp = New-AzApplicationGatewayFrontendIPConfig -Name "appGwFrontendPublicIp" -PublicIPAddress $pip
 $backendAddressPool = New-AzApplicationGatewayBackendAddressPool -Name "appGwBackendPool" -BackendFqdns $webAppUri
+$appGwSslCert = New-AzApplicationGatewaySslCertificate -Name "zerotrustGwSslCert" -KeyVaultSecretId $certSecretId
 $backendHttpSettings = New-AzApplicationGatewayBackendHttpSettings -Name "appGwBackendHttpSettings" -Port 443 -Protocol Https -CookieBasedAffinity Enabled -RequestTimeout 30 -HostName $webAppUri
 $listener = New-AzApplicationGatewayHttpListener -Name "appGwHttpListenerPublic" -Protocol Https -SslCertificate $appGwSslCert -FrontendIPConfiguration $frontendPublicIp -FrontendPort $frontendPort 
 $rule = New-AzApplicationGatewayRequestRoutingRule -Name "rule" -RuleType Basic -BackendHttpSettings $backendHttpSettings -HttpListener $listener -BackendAddressPool $backendAddressPool -Priority 1
