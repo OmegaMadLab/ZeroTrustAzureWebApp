@@ -94,7 +94,7 @@ $appGw.FirewallPolicy = $wafPolicy
 $appGw.Sku = (New-AzApplicationGatewaySku -Name WAF_v2 -Tier WAF_v2 -Capacity 1)
 Set-AzApplicationGateway -ApplicationGateway $appGw
 
-$trustedRootCert = New-AzApplicationGatewayTrustedRootCertificate -Name "fwRootCA" -CertificateFile .\rootCA.cer
+$trustedRootCert = New-AzApplicationGatewayTrustedRootCertificate -Name "fwRootCA" -CertificateFile ./rootCA.cer
 $backendHttpSettings = New-AzApplicationGatewayBackendHttpSettings -Name "appGwBackendHttpSettings" -Port 443 -Protocol Https -CookieBasedAffinity Enabled -RequestTimeout 30 -HostName $webAppUri -TrustedRootCertificate $trustedRootCert
 
 $appGw.TrustedRootCertificates = $trustedRootCert
