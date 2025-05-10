@@ -1,4 +1,4 @@
-$envPrefix = "AzureDay-2024"
+$envPrefix = "ZeroTrust"
 $rgName = "$envPrefix-RG"
 $location = "italynorth"
 $webAppUri = "zerotrust.omegamadlab.it"
@@ -21,7 +21,7 @@ $webAppCert = Import-AzKeyVaultCertificate -VaultName $kv.VaultName -Name "zerot
 $webApp = Get-AzWebApp -ResourceGroupName $rgName | Select-Object -First 1
 Write-Host "Create the following record in the public DNS zone of your domain:"
 Write-Host "Record type:    TXT"
-Write-Host "Record name:    asuid.$webAppUri"
+Write-Host "Record name:    asuid.$($webAppUri)"
 Write-Host "Record value:   $($webapp.CustomDomainVerificationId)"
 Read-Host -Prompt "Press Enter when ready to continue"
 
@@ -75,8 +75,8 @@ $policySetting = New-AzApplicationGatewayFirewallPolicySetting `
                     -State Enabled `
                     -MaxRequestBodySizeInKb 100 `
                     -MaxFileUploadInMb 100
-$managedRuleSet = New-AzApplicationGatewayFirewallPolicyManagedRuleSet -RuleSetType "OWASP" `
-                    -RuleSetVersion "3.2"
+$managedRuleSet = New-AzApplicationGatewayFirewallPolicyManagedRuleSet -RuleSetType "Microsoft_DefaultRuleSet" `
+                    -RuleSetVersion "2.1"
 $wafPolicy = New-AzApplicationGatewayFirewallPolicy `
                     -Name "WAF-POLICY" `
                     -ResourceGroup $rgName `

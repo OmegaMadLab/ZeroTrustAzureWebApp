@@ -16,3 +16,5 @@ rootCA.cer
 rootCA.crt
 rootCA.key
 rootCA.srl
+zerotrust.pfx
+

@@ -1,4 +1,4 @@
-$envPrefix = "AzureDay-2024"
+$envPrefix = "ZeroTrust"
 $location = "italynorth"
 $rgName = "$envPrefix-RG"
 $dnsDomainName = "omegamadlab.it"
